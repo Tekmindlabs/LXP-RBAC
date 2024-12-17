@@ -1,33 +1,35 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSession, signOut } from "next-auth/react";
 
 export function UserNav() {
   const { data: session } = useSession();
 
-  if (!session?.user) {
-    return null;
-  }
+  if (!session?.user) return null;
+
+  const initials = session.user.name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={session.user.image || ""} alt={session.user.name || ""} />
-            <AvatarFallback>
-              {session.user.name?.charAt(0) || session.user.email?.charAt(0)}
-            </AvatarFallback>
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -38,24 +40,22 @@ export function UserNav() {
             <p className="text-xs leading-none text-muted-foreground">
               {session.user.email}
             </p>
+            {session.user.roles && session.user.roles.length > 0 && (
+              <p className="text-xs leading-none text-muted-foreground">
+                Role: {session.user.roles[0]}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <a href="/dashboard/profile">Profile</a>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <a href="/dashboard/settings">Settings</a>
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => window.location.href = "/dashboard/profile"}>
+            Profile
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="cursor-pointer"
-          onSelect={(event) => {
-            event.preventDefault();
-            signOut({ callbackUrl: "/auth/signin" });
-          }}
-        >
-          Sign out
+        <DropdownMenuItem onClick={() => signOut()}>
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

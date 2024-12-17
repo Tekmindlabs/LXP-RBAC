@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react'
 import { Header } from '@/components/layout/header';
 import { Hero } from '@/components/home/hero';
 import { Features } from '@/components/home/features';
@@ -30,6 +31,7 @@ export default function Home() {
   };
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <div style={containerStyle}>
       <Header />
       <div style={buttonContainerStyle}>
@@ -60,5 +62,6 @@ export default function Home() {
       <Features />
       <Footer />
     </div>
+    </Suspense>
   );
 }
