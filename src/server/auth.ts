@@ -28,6 +28,7 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
+  debug: false,
   callbacks: {
     session: async ({ session, user }) => {
       if (session.user) {
@@ -78,22 +79,45 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
+          include: {
+            userRoles: {
+              include: {
+                role: {
+                  include: {
+                    permissions: {
+                      include: {
+                        permission: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         });
-
+        
         if (!user || !user.password) {
           throw new Error("Invalid credentials");
         }
-
+        
         const isValid = await bcrypt.compare(credentials.password, user.password);
-
+        
         if (!isValid) {
           throw new Error("Invalid credentials");
         }
-
+        
+        // Extract roles and permissions
+        const roles = user.userRoles.map((ur) => ur.role.name);
+        const permissions = user.userRoles
+          .flatMap((ur) => ur.role.permissions)
+          .map((rp) => rp.permission.name);
+        
         return {
           id: user.id,
           email: user.email,
           name: user.name,
+          roles: roles,
+          permissions: permissions
         };
       },
     }),
