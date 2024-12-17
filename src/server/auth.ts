@@ -25,41 +25,58 @@ declare module "next-auth" {
     roles: string[];
     permissions: string[];
   }
+
+  interface JWT {
+    id: string;
+    roles: string[];
+    permissions: string[];
+  }
 }
 
 export const authOptions: NextAuthOptions = {
-  debug: false,
+  debug: true, // Set to true temporarily for debugging
   callbacks: {
-    session: async ({ session, user }) => {
-      if (session.user) {
-        // Fetch user roles and permissions
-        const userWithRoles = await prisma.user.findUnique({
-          where: { id: user.id },
-          include: {
-            userRoles: {
-              include: {
-                role: {
-                  include: {
-                    permissions: {
-                      include: {
-                        permission: true,
-                      },
+    jwt: async ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+        token.roles = user.roles;
+        token.permissions = user.permissions;
+      }
+
+      // Fetch fresh data on every jwt callback
+      const userWithRoles = await prisma.user.findUnique({
+        where: { id: token.id as string },
+        include: {
+          userRoles: {
+            include: {
+              role: {
+                include: {
+                  permissions: {
+                    include: {
+                      permission: true,
                     },
                   },
                 },
               },
             },
           },
-        });
+        },
+      });
 
-        const roles = userWithRoles?.userRoles.map((ur) => ur.role.name) ?? [];
-        const permissions = userWithRoles?.userRoles
+      if (userWithRoles) {
+        token.roles = userWithRoles.userRoles.map((ur) => ur.role.name);
+        token.permissions = userWithRoles.userRoles
           .flatMap((ur) => ur.role.permissions)
-          .map((rp) => rp.permission.name) ?? [];
+          .map((rp) => rp.permission.name);
+      }
 
-        session.user.id = user.id;
-        session.user.roles = roles;
-        session.user.permissions = permissions;
+      return token;
+    },
+    session: async ({ session, token }) => {
+      if (session.user && token) {
+        session.user.id = token.id as string;
+        session.user.roles = token.roles as string[];
+        session.user.permissions = token.permissions as string[];
       }
       return session;
     },
@@ -87,14 +104,14 @@ export const authOptions: NextAuthOptions = {
                     permissions: {
                       include: {
                         permission: true,
-                      },
                     },
                   },
                 },
               },
             },
           },
-        });
+        },
+      });
         
         if (!user || !user.password) {
           throw new Error("Invalid credentials");
@@ -140,6 +157,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 };
 

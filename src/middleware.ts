@@ -12,41 +12,38 @@ interface CustomJWT extends DefaultJWT {
 
 export default withAuth(
   async function middleware(req) {
-    const token = (await getToken({ req })) as CustomJWT | null;
+    const token = await getToken({ req }) as CustomJWT | null;
     const isAuth = !!token;
-    const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
+    const isAuthPage = req.nextUrl.pathname.startsWith('/auth');
 
-    if (isAuthPage) {
-      if (isAuth && token) { // Add null check for token
-        // Redirect to role-specific dashboard
-        return NextResponse.redirect(new URL(`/dashboard/${token.roles[0]}`, req.url));
-      }
-      return null;
+    // If user is authenticated and trying to access auth pages, redirect to dashboard
+    if (isAuth && isAuthPage) {
+      const role = token.roles?.[0] || 'user';
+      return NextResponse.redirect(new URL(`/dashboard/${role}`, req.url));
     }
 
-    if (!isAuth) {
-      let from = req.nextUrl.pathname;
-      if (req.nextUrl.search) {
-        from += req.nextUrl.search;
-      }
-
+    // If user is not authenticated and trying to access protected routes
+    if (!isAuth && !isAuthPage) {
+      const callbackUrl = encodeURIComponent(req.nextUrl.pathname);
       return NextResponse.redirect(
-        new URL(`/auth/signin?from=${encodeURIComponent(from)}`, req.url)
+        new URL(`/auth/signin?callbackUrl=${callbackUrl}`, req.url)
       );
     }
 
-    // Handle dashboard root redirect
-    if (req.nextUrl.pathname === "/dashboard" && token) { // Add null check for token
-      return NextResponse.redirect(new URL(`/dashboard/${token.roles[0]}`, req.url));
-    }
+    return NextResponse.next();
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
-    },
+      authorized: ({ token }) => true // Let the middleware handle the logic
+    }
   }
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/:path*"],
+  matcher: [
+    '/dashboard/:path*',
+    '/auth/:path*',
+    // Exclude API and static files
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ]
 };
