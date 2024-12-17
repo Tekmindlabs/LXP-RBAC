@@ -1,121 +1,82 @@
-# Role-Based Access Control (RBAC) Starter
+# Aivy LXP - Learning Experience Platform
 
-A scalable and type-safe RBAC system built with modern web technologies.
+A comprehensive Learning Experience Platform built with Next.js, designed for educational institutions to manage their academic operations efficiently.
 
-## Features
+## Overview
 
-### Authentication
-- Email/password authentication using NextAuth.js
-- Magic link authentication
-- Session management
-- Protected API routes
-- Multi-language support
-- GDPR compliance
+Aivy LXP is an enterprise-grade learning management system that provides:
+- Complete academic structure management
+- Learning content delivery
+- Assessment and grading tools
+- Analytics and reporting
+- Communication tools
+
+## Key Features
+
+### Academic Management
+- Program and class management
+- Curriculum planning
+- Resource organization
+- Attendance tracking
+
+### Learning Tools
+- Content delivery system
+- Interactive assessments
+- Assignment management
+- Grade book
 
 ### User Management
-- User profiles with basic fields
-- Role assignment
-- Password reset functionality
-- Email verification
-- Profile management
+- Role-based access control
+- Student profiles
+- Teacher dashboards
+- Parent portals
 
-### Role Management
-- Pre-defined roles (Super Admin, Admin, Program Coordinator, Teacher, Student, Parent)
-- Role hierarchy
-- Permission inheritance
-- Role assignment/removal
-
-### Permission System
-- Granular permissions
-- Permission grouping by feature
-- Permission inheritance through roles
-- Permission checking middleware
-
-### API Structure
-- Type-safe tRPC endpoints
-- Protected routes
-- Rate limiting
-- Error handling
+### Analytics & Reporting
+- Performance tracking
+- Custom reports
+- Data visualization
+- Progress monitoring
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript
-- **API**: tRPC for end-to-end type safety
-- **Database**: PostgreSQL with Prisma ORM
+- **Frontend**: Next.js, TypeScript, Tailwind CSS
+- **Backend**: tRPC, Prisma, PostgreSQL
 - **Authentication**: NextAuth.js
-- **Styling**: Tailwind CSS
-- **UI Components**: shadcn/ui
-- **Form Handling**: React Hook Form with Zod validation
-- **Database Queries**: Kysely for type-safe SQL
-- **Email**: Nodemailer for transactional emails
-
-## Project Structure
-
-```
-/src
-  /app                 # Next.js app router pages
-  /components         # Reusable UI components
-  /lib                # Utility functions and shared code
-  /server            # Server-side code
-    /api             # tRPC API routes
-    /auth            # Authentication logic
-    /db              # Database configuration
-  /utils             # Helper functions
-  /hooks             # Custom React hooks
-  /types             # TypeScript type definitions
-```
+- **Testing**: Jest, React Testing Library
 
 ## Getting Started
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Copy `.env.example` to `.env` and fill in your environment variables
-4. Initialize the database:
-   ```bash
-   npm run prisma:generate
-   npm run prisma:push
-   ```
-5. Start the development server:
-   ```bash
-   npm run dev
-   ```
+### Prerequisites
+```bash
+# Install dependencies
+bun install
 
-## Test Credentials
+# Setup environment variables
+cp .env.example .env.local
 
-| Role                | Email                     | Password        |
-|--------------------|-----------------------------|-----------------|
-| Super Admin        | superadmin@example.com     | superadmin123   |
-| Admin              | admin@example.com          | admin123        |
-| Program Coordinator| coordinator@example.com     | coordinator123  |
-| Teacher            | teacher@example.com        | teacher123      |
-| Student            | student@example.com        | student123      |
-| Parent             | parent@example.com         | parent123       |
+# Initialize database
+bun db:push
+Development
+bash
+Copy code
+# Run development server
+bun run dev
 
-## Environment Variables
+# Run tests
+bun test
 
-```env
-# Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/rbac-starter"
-
-# Next Auth
-NEXTAUTH_SECRET="your-secret-here"
-NEXTAUTH_URL="http://localhost:3000"
-
-# Email (SMTP)
-EMAIL_SERVER_HOST="smtp.example.com"
-EMAIL_SERVER_PORT="587"
-EMAIL_SERVER_USER="user@example.com"
-EMAIL_SERVER_PASSWORD="password"
-EMAIL_FROM="noreply@example.com"
-
-# App
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-```
-
-## License
-
-MIT
+# Build for production
+bun run build
+Project Structure
+Copy code
+/apps
+  /nextjs
+    /src
+      /components     # UI components
+      /features      # Feature modules
+      /pages        # Route pages
+      /api          # API routes
+/packages
+  /db              # Database schema
+  /api             # API definitions
+  /ui              # Shared UI components
