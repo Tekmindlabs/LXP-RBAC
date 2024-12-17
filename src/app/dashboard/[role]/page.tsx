@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { DefaultRoles } from "@/utils/permissions";
-import { DashboardContent } from "@/components/dashboard/content";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
 
 export default async function RoleDashboard({
   params,
@@ -15,9 +15,7 @@ export default async function RoleDashboard({
     redirect("/auth/signin");
   }
 
-  // Verify user has access to this role's dashboard
   if (!session.user.roles.includes(params.role)) {
-    // Redirect to their primary role dashboard
     redirect(`/dashboard/${session.user.roles[0]}`);
   }
 
