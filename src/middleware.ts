@@ -1,18 +1,25 @@
+// src/middleware.ts
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import type { DefaultJWT } from "next-auth/jwt";
+
+
+interface CustomJWT extends DefaultJWT {
+  roles: string[];
+  permissions: string[];
+}
 
 export default withAuth(
   async function middleware(req) {
-    const token = await getToken({ req });
+    const token = (await getToken({ req })) as CustomJWT | null;
     const isAuth = !!token;
     const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
 
     if (isAuthPage) {
-      if (isAuth) {
+      if (isAuth && token) { // Add null check for token
         // Redirect to role-specific dashboard
-        const roles = token.roles as string[];
-        return NextResponse.redirect(new URL(`/dashboard/${roles[0]}`, req.url));
+        return NextResponse.redirect(new URL(`/dashboard/${token.roles[0]}`, req.url));
       }
       return null;
     }
@@ -29,9 +36,8 @@ export default withAuth(
     }
 
     // Handle dashboard root redirect
-    if (req.nextUrl.pathname === "/dashboard") {
-      const roles = token.roles as string[];
-      return NextResponse.redirect(new URL(`/dashboard/${roles[0]}`, req.url));
+    if (req.nextUrl.pathname === "/dashboard" && token) { // Add null check for token
+      return NextResponse.redirect(new URL(`/dashboard/${token.roles[0]}`, req.url));
     }
   },
   {
