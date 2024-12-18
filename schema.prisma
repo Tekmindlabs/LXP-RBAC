@@ -1,0 +1,1291 @@
+generator client {
+  provider     = "prisma-kysely"
+  output       = "."
+  fileName     = "types.ts"
+  enumFileName = "enums.ts"
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("POSTGRES_URL")
+  relationMode = "prisma"
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+  BUSINESS
+}
+
+model Customer {
+  id                     Int               @id @default(autoincrement())
+  authUserId             String
+  name                   String?
+  plan                   SubscriptionPlan?
+  stripeCustomerId       String?           @unique
+  stripeSubscriptionId   String?           @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @default(now())
+
+  @@index([authUserId])
+}
+
+model Account {
+  id                String  @id @default(dbgenerated("gen_random_uuid()"))
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model K8sClusterConfig {
+  id         Int               @id @default(autoincrement())
+  name       String
+  location   String
+  authUserId String
+  plan       SubscriptionPlan? @default(FREE)
+  network    String?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @default(now())
+  status     Status?           @default(PENDING)
+  delete     Boolean?          @default(false)
+
+  // @@unique([plan, authUserId])
+  @@index([authUserId])
+}
+
+enum Status {
+  PENDING
+  CREATING
+  INITING
+  RUNNING
+  STOPPED
+  DELETED
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+  SUSPENDED
+}
+
+
+// Enhanced Enums
+enum UserRole {
+  ADMIN
+  PROGRAM_COORDINATOR
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+enum ActivityType {
+  QUIZ
+  ASSIGNMENT
+  READING
+  ASSESSMENT
+}
+
+
+enum EventType {
+  HOLIDAY
+  EXAM
+  ASSEMBLY
+  OTHER
+}
+
+// Core Entities with Improvements
+
+model Program {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  name        String    @db.VarChar(100)
+  description String?
+  level       String    @db.VarChar(50)  
+  status      Status   @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deleted     DateTime?
+  version     Int       @default(1)
+
+  // Relations
+  coordinator       User?        @relation("ProgramCoordinator", fields: [coordinatorId], references: [id])
+  coordinatorId    String?
+  classes Class[]
+  classGroups      ClassGroup[]
+  academicCalendar AcademicCalendar?
+
+  @@index([coordinatorId])
+}
+
+model AcademicCalendar {
+  id           String   @id @default(dbgenerated("gen_random_uuid()"))
+  academicYear String
+  startDate    DateTime
+  endDate      DateTime
+  status       Status   @default(ACTIVE)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deleted      DateTime?
+
+  // Relations
+  program   Program @relation(fields: [programId], references: [id])
+  programId String  @unique
+  terms     Term[]
+  events    CalendarEvent[]
+
+  @@index([programId])
+}
+
+model Term {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  status    Status   @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted   DateTime?
+
+  // Relations
+  calendar   AcademicCalendar @relation(fields: [calendarId], references: [id])
+  calendarId String
+  performanceMetrics PerformanceMetric[]
+  gradeBooks GradeBook[] // Add this opposite relation
+
+  @@index([calendarId])
+}
+
+model CalendarEvent {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  isRecurring Boolean   @default(false)
+  eventType   EventType
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  // Relations
+  calendar   AcademicCalendar @relation(fields: [calendarId], references: [id])
+  calendarId String
+
+  @@index([calendarId])
+}
+
+model ClassGroup {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  description String?
+  capacity    Int
+  grade       String
+  status      Status   @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deleted     DateTime?
+
+  // Relations
+  program Program @relation(fields: [programId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  programId String
+  classes   Class[]
+  subjects  Subject[]
+  timetable Timetable?
+
+  @@index([programId])
+}
+
+model Subject {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  code        String   @unique
+  description String?
+  status      Status   @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deleted     DateTime?
+
+  // Relations
+  classGroup   ClassGroup @relation(fields: [classGroupId], references: [id])
+  classGroupId String
+  teachers     User[]    @relation("SubjectTeacher")
+  timetableSlots TimetableSlot[]
+
+  performanceMetrics PerformanceMetric[]
+
+  assessments         Assessment[]
+  gradeBooks         GradeBook[]
+  teacherAssignments TeacherSubjectAssignment[]
+
+  @@index([classGroupId])
+}
+
+model Class {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  name         String     @db.VarChar(100)
+  sizeLimit    Int?      @db.SmallInt
+  capacity    Int
+  status      Status   @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deleted     DateTime?
+  programId   String
+  program Program @relation(fields: [programId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  activities ClassActivity[] @relation
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  classGroupId String
+  teacher User @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  teacherId    String
+  students     User[]     @relation("StudentClass")
+  assessments     Assessment[]
+  attendanceRecords Attendance[]
+  resources ClassResource[]
+  attendanceAnalytics AttendanceAnalytics[]
+
+  @@index([programId])
+  @@index([classGroupId])
+  @@index([teacherId])
+}
+
+model ClassActivity {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  title       String
+  description String?
+  type        ActivityType
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  // Relation to Class
+  class       Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId     String
+
+  @@index([classId])
+}
+
+model Timetable {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  status      Status   @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deleted     DateTime?
+
+  // Relations
+  classGroup   ClassGroup @relation(fields: [classGroupId], references: [id])
+  classGroupId String     @unique
+  slots        TimetableSlot[]
+
+  @@index([classGroupId])
+}
+
+model TimetableSlot {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  dayOfWeek Int      // 1-7 for Monday-Sunday
+  startTime String   // Format: "HH:mm"
+  endTime   String   // Format: "HH:mm"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  timetable   Timetable @relation(fields: [timetableId], references: [id])
+  timetableId String
+  subject     Subject   @relation(fields: [subjectId], references: [id])
+  subjectId   String
+
+  @@index([timetableId])
+  @@index([subjectId])
+}
+
+model User {
+  id            String    @id @default(dbgenerated("gen_random_uuid()"))
+  authUserId    String    @unique
+  name          String?
+  email         String    @unique
+  role          UserRole
+  emailVerified DateTime?
+  image         String?
+  status        Status    @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deleted       DateTime?
+
+  // Relations
+  coordinatedPrograms Program[]  @relation("ProgramCoordinator")
+  teacherClasses     Class[]     @relation("ClassTeacher")
+  teacherSubjects    Subject[]   @relation("SubjectTeacher")
+  studentClass Class? @relation("StudentClass", fields: [classId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  classId           String?
+  parentOf          User[]      @relation("ParentChild")
+  children          User[]      @relation("ParentChild")
+  
+  // Additional relations for Phase 2
+  createdAssessments     Assessment[]
+  submissions           AssessmentSubmission[]
+  gradedSubmissions     AssessmentSubmission[] @relation("GradedSubmissions")
+  attendanceRecords     Attendance[]
+  gradeBooks           GradeBook[]
+  subjectAssignments TeacherSubjectAssignment[]
+  studentsAsParent     StudentParent[]         @relation("ParentStudentRelation")
+  parentsAsStudent     StudentParent[]         @relation("StudentParentRelation")
+
+  // Additional relations for Phase 3
+  sentNotifications     Notification[]        @relation("SentNotifications")
+  receivedNotifications NotificationRecipient[]
+  sentMessages          Message[]             @relation("SentMessages")
+  threadParticipations  MessageThreadParticipant[]
+  messageReads          MessageRead[]
+  uploadedResources     Resource[]
+  activityLogs          ActivityLog[]
+
+
+ // Additional relations for Phase 4
+  createdReports      Report[]            @relation("CreatedReports")
+  ownedDashboards     Dashboard[]         @relation("OwnedDashboards")
+  performanceMetrics  PerformanceMetric[] @relation("StudentMetrics")
+
+  // Additional relations for Phase 5
+  apiKeys     ApiKey[]
+  webhooks    Webhook[]
+  auditLogs   AuditLog[]
+
+  // Additional relations for Phase 6
+  recommendations Recommendation[]
+
+  // Auth relations
+  accounts          Account[]
+  sessions          Session[]
+
+  @@index([authUserId])
+  @@index([classId])
+}
+
+
+model Session {
+  id           String   @id @default(dbgenerated("gen_random_uuid()"))
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+// Additional Enums for Phase 2
+enum AssessmentType {
+  QUIZ
+  TEST
+  EXAM
+  PROJECT
+  HOMEWORK
+  PRESENTATION
+}
+
+enum GradeScale {
+  LETTER
+  PERCENTAGE
+  GPA
+  CUSTOM
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+// Phase 2 Models
+
+model Assessment {
+  id          String         @id @default(dbgenerated("gen_random_uuid()"))
+  title       String
+  description String?
+  type        AssessmentType
+  totalMarks  Float
+  weightage   Float?
+  dueDate     DateTime
+  status      Status        @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deleted     DateTime?
+
+  // Additional relations for Phase 3
+  resources AssessmentResource[]
+
+  // Relations
+  subject     Subject       @relation(fields: [subjectId], references: [id])
+  subjectId   String
+  class       Class         @relation(fields: [classId], references: [id])
+  classId     String
+  createdBy   User         @relation(fields: [createdById], references: [id])
+  createdById String
+  submissions AssessmentSubmission[]
+
+  @@index([subjectId])
+  @@index([classId])
+  @@index([createdById])
+}
+
+model AssessmentSubmission {
+  id           String    @id @default(dbgenerated("gen_random_uuid()"))
+  marks        Float?
+  feedback     String?
+  submittedAt  DateTime  @default(now())
+  status       Status    @default(ACTIVE)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deleted      DateTime?
+
+  // Relations
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId String
+  student      User      @relation(fields: [studentId], references: [id])
+  studentId    String
+  gradedBy     User?      @relation("GradedSubmissions", fields: [gradedById], references: [id])
+  gradedById   String?
+
+  @@index([assessmentId])
+  @@index([studentId])
+  @@index([gradedById])
+}
+
+model Attendance {
+  id        String           @id @default(dbgenerated("gen_random_uuid()"))
+  date      DateTime
+  status    AttendanceStatus
+  note      String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  deleted   DateTime?
+
+  // Relations
+  student   User   @relation(fields: [studentId], references: [id])
+  studentId String
+  class     Class  @relation(fields: [classId], references: [id])
+  classId   String
+
+  @@index([studentId])
+  @@index([classId])
+  @@unique([date, studentId, classId])
+}
+
+model GradeBook {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  term        Term      @relation(fields: [termId], references: [id])
+  termId      String
+  student     User      @relation(fields: [studentId], references: [id])
+  studentId   String
+  subject     Subject   @relation(fields: [subjectId], references: [id])
+  subjectId   String
+  finalGrade  Float?
+  comments    String?
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([termId])
+  @@index([studentId])
+  @@index([subjectId])
+  @@unique([termId, studentId, subjectId])
+}
+
+model TeacherSubjectAssignment {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  status    Status   @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted   DateTime?
+
+  // Relations
+  teacher   User    @relation(fields: [teacherId], references: [id])
+  teacherId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String
+
+  @@index([teacherId])
+  @@index([subjectId])
+  @@unique([teacherId, subjectId])
+}
+
+model StudentParent {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  status    Status   @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted   DateTime?
+
+  // Relations
+  student   User   @relation("StudentParentRelation", fields: [studentId], references: [id])
+  studentId String
+  parent    User   @relation("ParentStudentRelation", fields: [parentId], references: [id])
+  parentId  String
+
+  @@index([studentId])
+  @@index([parentId])
+  @@unique([studentId, parentId])
+}
+
+// Additional Enums for Phase 3
+enum NotificationType {
+  ANNOUNCEMENT
+  ASSIGNMENT
+  GRADE_POSTED
+  ATTENDANCE_ALERT
+  EVENT
+  PRIVATE_MESSAGE
+}
+
+enum ResourceType {
+  DOCUMENT
+  VIDEO
+  AUDIO
+  LINK
+  IMAGE
+  OTHER
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+// Phase 3 Models
+
+model Notification {
+  id          String           @id @default(dbgenerated("gen_random_uuid()"))
+  title       String
+  content     String
+  type        NotificationType
+  priority    Int              @default(3) // 1 highest, 5 lowest
+  senderId    String
+  sender      User             @relation("SentNotifications", fields: [senderId], references: [id])
+  recipients  NotificationRecipient[]
+  createdAt   DateTime         @default(now())
+  scheduledFor DateTime?
+  sentAt      DateTime?
+  status      Status           @default(ACTIVE)
+  deleted     DateTime?
+
+  @@index([senderId])
+}
+
+model NotificationRecipient {
+  id             String       @id @default(dbgenerated("gen_random_uuid()"))
+  notification   Notification @relation(fields: [notificationId], references: [id])
+  notificationId String
+  recipient      User         @relation(fields: [recipientId], references: [id])
+  recipientId    String
+  readAt         DateTime?
+  status         Status       @default(ACTIVE)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deleted        DateTime?
+
+  @@index([notificationId])
+  @@index([recipientId])
+  @@unique([notificationId, recipientId])
+}
+
+model Message {
+  id          String           @id @default(dbgenerated("gen_random_uuid()"))
+  content     String
+  senderId    String
+  sender      User             @relation("SentMessages", fields: [senderId], references: [id])
+  thread      MessageThread    @relation(fields: [threadId], references: [id])
+  threadId    String
+  status      MessageStatus    @default(SENT)
+  resources   MessageResource[]
+  readBy      MessageRead[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deleted     DateTime?
+
+  @@index([senderId])
+  @@index([threadId])
+}
+
+model MessageThread {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  title       String?
+  messages    Message[]
+  participants MessageThreadParticipant[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+}
+
+model MessageThreadParticipant {
+  id        String        @id @default(dbgenerated("gen_random_uuid()"))
+  thread    MessageThread @relation(fields: [threadId], references: [id])
+  threadId  String
+  user      User         @relation(fields: [userId], references: [id])
+  userId    String
+  status    Status       @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deleted   DateTime?
+
+  @@index([threadId])
+  @@index([userId])
+  @@unique([threadId, userId])
+}
+
+model MessageRead {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  message   Message   @relation(fields: [messageId], references: [id])
+  messageId String
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  readAt    DateTime  @default(now())
+
+  @@index([messageId])
+  @@index([userId])
+  @@unique([messageId, userId])
+}
+
+model Resource {
+  id          String       @id @default(dbgenerated("gen_random_uuid()"))
+  title       String
+  description String?
+  type        ResourceType
+  url         String
+  size        Int?        // in bytes
+  mimeType    String?
+  uploadedBy  User        @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  status      Status      @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deleted     DateTime?
+
+  // Relations
+  classResources     ClassResource[]
+  messageResources   MessageResource[]
+  assessmentResources AssessmentResource[]
+
+  usageAnalytics ResourceUsageAnalytics[]
+  
+  @@index([uploadedById])
+}
+
+model ClassResource {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  resource    Resource  @relation(fields: [resourceId], references: [id])
+  resourceId  String
+  class       Class     @relation(fields: [classId], references: [id])
+  classId     String
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([resourceId])
+  @@index([classId])
+  @@unique([resourceId, classId])
+}
+
+model MessageResource {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  resource    Resource  @relation(fields: [resourceId], references: [id])
+  resourceId  String
+  message     Message   @relation(fields: [messageId], references: [id])
+  messageId   String
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([resourceId])
+  @@index([messageId])
+  @@unique([resourceId, messageId])
+}
+
+model AssessmentResource {
+  id            String     @id @default(dbgenerated("gen_random_uuid()"))
+  resource      Resource   @relation(fields: [resourceId], references: [id])
+  resourceId    String
+  assessment    Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId  String
+  status        Status     @default(ACTIVE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deleted       DateTime?
+
+  @@index([resourceId])
+  @@index([assessmentId])
+  @@unique([resourceId, assessmentId])
+}
+
+model ActivityLog {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  action      String
+  entityType  String
+  entityId    String
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  ipAddress   String?
+  userAgent   String?
+
+  @@index([userId])
+  @@index([entityType, entityId])
+}
+
+
+// Additional Enums for Phase 4
+enum ReportType {
+  ACADEMIC_PERFORMANCE
+  ATTENDANCE_SUMMARY
+  BEHAVIOR_ANALYSIS
+  RESOURCE_USAGE
+  ACTIVITY_SUMMARY
+  CUSTOM
+}
+
+enum ReportFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  ONE_TIME
+}
+
+enum MetricType {
+  NUMERIC
+  PERCENTAGE
+  RATIO
+  BOOLEAN
+  TEXT
+}
+
+// Phase 4 Models
+
+model Report {
+  id          String         @id @default(dbgenerated("gen_random_uuid()"))
+  title       String
+  description String?
+  type        ReportType
+  frequency   ReportFrequency
+  parameters  Json?          // Stored report parameters
+  createdBy   User          @relation("CreatedReports", fields: [createdById], references: [id])
+  createdById String
+  schedule    ReportSchedule?
+  snapshots   ReportSnapshot[]
+  status      Status         @default(ACTIVE)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deleted     DateTime?
+
+  @@index([createdById])
+}
+
+model ReportSchedule {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  report      Report    @relation(fields: [reportId], references: [id])
+  reportId    String    @unique
+  cronPattern String    // Cron expression for scheduling
+  lastRun     DateTime?
+  nextRun     DateTime?
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([reportId])
+}
+
+model ReportSnapshot {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  report      Report    @relation(fields: [reportId], references: [id])
+  reportId    String
+  data        Json      // Stored report data
+  generatedAt DateTime  @default(now())
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([reportId])
+}
+
+model AnalyticMetric {
+  id          String     @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  description String?
+  type        MetricType
+  formula     String?    // SQL or calculation formula
+  parameters  Json?      // Configuration parameters
+  status      Status     @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deleted     DateTime?
+
+  // Relations
+  dataPoints  MetricDataPoint[]
+}
+
+model MetricDataPoint {
+  id          String         @id @default(dbgenerated("gen_random_uuid()"))
+  metric      AnalyticMetric @relation(fields: [metricId], references: [id])
+  metricId    String
+  value       Json          // Stored metric value
+  timestamp   DateTime      @default(now())
+  metadata    Json?         // Additional context data
+  status      Status        @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deleted     DateTime?
+
+  @@index([metricId])
+}
+
+model Dashboard {
+  id          String         @id @default(dbgenerated("gen_random_uuid()"))
+  title       String
+  description String?
+  layout      Json?         // Dashboard layout configuration
+  isPublic    Boolean       @default(false)
+  owner       User          @relation("OwnedDashboards", fields: [ownerId], references: [id])
+  ownerId     String
+  widgets     DashboardWidget[]
+  status      Status        @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deleted     DateTime?
+
+  @@index([ownerId])
+}
+
+model DashboardWidget {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  title       String
+  type        String    // Chart, Table, Metric, etc.
+  config      Json      // Widget configuration
+  position    Json      // Position in dashboard
+  dashboard   Dashboard @relation(fields: [dashboardId], references: [id])
+  dashboardId String
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([dashboardId])
+}
+
+model PerformanceMetric {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  student     User      @relation("StudentMetrics", fields: [studentId], references: [id])
+  studentId   String
+  subject     Subject   @relation(fields: [subjectId], references: [id])
+  subjectId   String
+  term        Term      @relation(fields: [termId], references: [id])
+  termId      String
+  metrics     Json      // Stored performance metrics
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([studentId])
+  @@index([subjectId])
+  @@index([termId])
+}
+
+model AttendanceAnalytics {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  class       Class     @relation(fields: [classId], references: [id])
+  classId     String
+  period      String    // Time period (e.g., "2024-01")
+  metrics     Json      // Attendance statistics
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([classId])
+}
+
+model ResourceUsageAnalytics {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  resource    Resource  @relation(fields: [resourceId], references: [id])
+  resourceId  String
+  period      String    // Time period
+  metrics     Json      // Usage statistics
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([resourceId])
+}
+
+
+// Additional Enums for Phase 5
+enum IntegrationType {
+  LMS
+  PAYMENT
+  EMAIL
+  SMS
+  CALENDAR
+  AUTHENTICATION
+  CUSTOM
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  PAUSED
+  FAILED
+  MAINTENANCE
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Phase 5 Models
+
+model Integration {
+  id            String            @id @default(dbgenerated("gen_random_uuid()"))
+  name          String
+  type          IntegrationType
+  config        Json              // Configuration details
+  credentials   Json?             // Encrypted credentials
+  status        IntegrationStatus @default(ACTIVE)
+  lastSync      DateTime?
+  nextSync      DateTime?
+  webhookUrl    String?
+  apiKey        String?           @unique
+  events        IntegrationEvent[]
+  logs          IntegrationLog[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  deleted       DateTime?
+
+  @@index([type])
+}
+
+model IntegrationEvent {
+  id            String      @id @default(dbgenerated("gen_random_uuid()"))
+  integration   Integration @relation(fields: [integrationId], references: [id])
+  integrationId String
+  eventType     String
+  payload       Json
+  status        Status      @default(ACTIVE)
+  processedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deleted       DateTime?
+
+  @@index([integrationId])
+}
+
+model IntegrationLog {
+  id            String      @id @default(dbgenerated("gen_random_uuid()"))
+  integration   Integration @relation(fields: [integrationId], references: [id])
+  integrationId String
+  level         String      // INFO, WARNING, ERROR
+  message       String
+  details       Json?
+  createdAt     DateTime    @default(now())
+
+  @@index([integrationId])
+  @@index([level])
+}
+
+model SystemJob {
+  id          String     @id @default(dbgenerated("gen_random_uuid()"))
+  type        String     // backup, sync, cleanup, etc.
+  status      JobStatus  @default(PENDING)
+  progress    Float      @default(0)
+  payload     Json?
+  result      Json?
+  startedAt   DateTime?
+  completedAt DateTime?
+  nextRun     DateTime?
+  logs        SystemJobLog[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deleted     DateTime?
+
+  @@index([type])
+  @@index([status])
+}
+
+model SystemJobLog {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  job         SystemJob @relation(fields: [jobId], references: [id])
+  jobId       String
+  message     String
+  level       String    // INFO, WARNING, ERROR
+  createdAt   DateTime  @default(now())
+
+  @@index([jobId])
+  @@index([level])
+}
+
+model AuditLog {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  user        User?     @relation(fields: [userId], references: [id])
+  userId      String?
+  action      String
+  entityType  String
+  entityId    String
+  changes     Json?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([action])
+}
+
+model SystemConfig {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  key         String    @unique
+  value       Json
+  description String?
+  category    String
+  isPublic    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([category])
+}
+
+model ApiKey {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  key         String    @unique
+  scopes      String[]
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdById String
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([createdById])
+}
+
+model Webhook {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  url         String
+  events      String[]
+  secret      String?
+  status      Status    @default(ACTIVE)
+  lastSuccess DateTime?
+  lastFailure DateTime?
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([createdById])
+}
+
+// Additional Enums for Phase 6
+enum CacheType {
+  MEMORY
+  REDIS
+  CUSTOM
+}
+
+enum QueuePriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum SearchIndexType {
+  USERS
+  CONTENT
+  RESOURCES
+  ACTIVITIES
+}
+
+// Phase 6 Models
+
+model Cache {
+  id          String     @id @default(dbgenerated("gen_random_uuid()"))
+  key         String     @unique
+  value       Json
+  type        CacheType
+  ttl         Int?       // Time to live in seconds
+  hits        Int        @default(0)
+  lastAccess  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deleted     DateTime?
+
+  @@index([key])
+  @@index([type])
+}
+
+model Queue {
+  id          String        @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  priority    QueuePriority @default(MEDIUM)
+  payload     Json
+  status      JobStatus     @default(PENDING)
+  attempts    Int           @default(0)
+  maxAttempts Int           @default(3)
+  processedAt DateTime?
+  error       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deleted     DateTime?
+
+  @@index([name])
+  @@index([status])
+  @@index([priority])
+}
+
+model SearchIndex {
+  id          String          @id @default(dbgenerated("gen_random_uuid()"))
+  type        SearchIndexType
+  entityId    String
+  content     String          // Indexed content
+  metadata    Json?
+  lastIndexed DateTime        @default(now())
+  status      Status          @default(ACTIVE)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deleted     DateTime?
+
+  @@index([type])
+  @@index([entityId])
+  @@index([content])
+}
+
+model OptimizationRule {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  description String?
+  conditions  Json      // Rule conditions
+  actions     Json      // Actions to take
+  priority    Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([priority])
+}
+
+model PerformanceMetrics {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  endpoint    String
+  method      String
+  duration    Int       // Response time in milliseconds
+  statusCode  Int
+  timestamp   DateTime  @default(now())
+  metadata    Json?
+
+  @@index([endpoint])
+  @@index([timestamp])
+}
+
+model SystemHealth {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  component   String
+  status      Status
+  metrics     Json
+  lastCheck   DateTime  @default(now())
+  nextCheck   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([component])
+  @@index([status])
+}
+
+model MLModel {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  version     String
+  type        String
+  parameters  Json
+  metrics     Json?
+  status      Status    @default(ACTIVE)
+  trainedAt   DateTime?
+  deployedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  recommendations Recommendation[]
+
+  @@index([name, version])
+}
+
+model Recommendation {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  type        String
+  content     Json
+  score       Float
+  model       MLModel   @relation(fields: [modelId], references: [id])
+  modelId     String
+  status      Status    @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+
+  @@index([userId])
+  @@index([type])
+}
+
+model OptimizationExperiment {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  description String?
+  variants    Json      // Different test variants
+  metrics     Json      // Success metrics
+  startDate   DateTime
+  endDate     DateTime?
+  status      Status    @default(ACTIVE)
+  results     Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     DateTime?
+}
