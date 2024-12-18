@@ -1,0 +1,145 @@
+### Updated Product Requirements Document (PRD) for AIVY LXP AI-First Learning Experience Platform
+
+#### **1. Overview**
+The AI-First Learning Experience Platform (LXP) is a transformative educational platform designed to provide a personalized, role-based, and generative user experience. At its core, it integrates CopilotKit—a robust AI-driven toolkit—to offer each role its unique workspace complete with a knowledge base, agents, tools, knowledge graphs, long-term memory, and full contextual understanding. 
+
+By focusing on minimal page navigation and leveraging generative UI design, users can create agentic workflows in an intuitive, LangChain-style interface. The platform prioritizes GDPR compliance, data privacy, and a human-centered design to ensure inclusivity, security, and adaptability.
+
+---
+
+### **2. Platform Features**
+#### **2.1 Generative UI & Minimal Pages**
+- **Dynamic, Context-Aware UI**: Simplifies complex workflows into a single, generative interface.
+- **Adaptive Content Display**: The interface learns user preferences, tailoring layouts and recommendations dynamically.
+- **Agentic Workflows**: Drag-and-drop, LangGraph-style visual workflows to integrate AI agents, tools, and memory efficiently.
+
+#### **2.2 Role-Specific Workspaces**
+Each user role (e.g., Student, Teacher, Coordinator, Parent, Admin) has a fully customized workspace comprising:
+- **Knowledge Base**: Centralized repository for documents, curriculum, and FAQs.
+- **AI Agents**: Role-specific assistants providing task support, such as grading, content creation, scheduling, and feedback.
+- **Tools**: Context-relevant functionalities, such as progress trackers, resource managers, or messaging systems.
+- **Knowledge Graphs**: Visual mapping of relationships between entities like subjects, classes, and students.
+- **Long-Term Memory**: AI remembers user preferences, historical decisions, and institutional trends.
+
+#### **2.3 GDPR Compliance and Data Privacy**
+- Role-based access control (RBAC) ensures data segmentation.
+- Data encryption in transit and at rest.
+- Compliance with global data privacy standards, including GDPR and CCPA.
+- User-level control over data sharing, deletion, and visibility.
+
+#### **2.4 Human-Centric Design**
+- Inclusive workflows and accessible design (e.g., screen readers, multilingual support).
+- Transparency in AI decision-making to ensure user trust.
+- Real-time assistance with AI copilots for all user roles.
+
+---
+
+### **3. Role-Specific Tools and Default Workflows**
+#### **3.1 Administrator**
+##### Tools:
+- Centralized dashboard for managing users, roles, and data.
+- AI-driven audit tools for compliance and operational insights.
+- Communication hub for organization-wide announcements.
+
+##### Default Workflows:
+- **System Management**: Create academic structures (programs, class groups, terms).
+- **User Roles & Permissions**: Define user-specific roles and permissions.
+- **Audit Reports**: Generate weekly compliance and activity reports.
+
+#### **3.2 Program Coordinator**
+##### Tools:
+- AI planning assistant for timetables, assessments, and teacher assignments.
+- Student and teacher performance tracking.
+- Resource allocation tools for class activities.
+
+##### Default Workflows:
+- **Timetable Management**: Set up class schedules, resolve conflicts, and notify stakeholders.
+- **Performance Analysis**: Track at-risk students, suggest interventions.
+- **Activity Planning**: Approve, monitor, and evaluate learning activities.
+
+#### **3.3 Teacher**
+##### Tools:
+- Content creator for lesson plans, quizzes, and assignments.
+- AI-based grading assistant for faster evaluation and feedback.
+- Messaging and notification system for students and parents.
+
+##### Default Workflows:
+- **Lesson Delivery**: Upload resources, assign tasks, and track submissions.
+- **Grading Workflow**: Use AI to grade, provide feedback, and update progress trackers.
+- **Parent Communication**: Notify parents of progress or concerns.
+
+#### **3.4 Student**
+##### Tools:
+- AI study companion for personalized learning guidance.
+- Performance tracker with visual insights and recommendations.
+- Interactive learning content with quizzes and practice tools.
+
+##### Default Workflows:
+- **Daily Workflow**: Access lessons, complete assignments, and track performance.
+- **Exam Preparation**: Get personalized study schedules and resources.
+- **Self-Assessment**: Practice quizzes and track improvement metrics.
+
+#### **3.5 Parent**
+##### Tools:
+- Unified dashboard for multi-child progress monitoring.
+- AI insights into performance trends and behavioral patterns.
+- Messaging tools for teacher-parent communication.
+
+##### Default Workflows:
+- **Progress Review**: Access grades, attendance, and feedback.
+- **Meeting Scheduling**: Arrange parent-teacher conferences.
+- **Behavioral Insights**: Address flagged concerns or celebrate milestones.
+
+---
+
+### **4. Key AI-Driven Features**
+1. **CopilotKit Integration**: Modular toolkit enabling users to access AI-powered agents for task management, decision-making, and learning assistance.
+2. **Knowledge Graphs**: Visual representation of relationships between users, content, and activities.
+3. **Long-Term Memory**: AI contextual memory to maintain relevance across workflows and sessions.
+4. **LangGraph-Style Workflow Builder**: Visual, drag-and-drop interface for creating agentic workflows, such as:
+   - Automating notification schedules.
+   - Integrating third-party APIs into teaching or administrative tasks.
+   - Building personalized learning pathways for students.
+
+---
+
+### **5. Workflow Examples**
+#### **5.1 Creating a New Academic Program (Coordinator)**
+1. Define program objectives and duration.
+2. Set up associated terms, class groups, and subjects.
+3. Assign teachers and coordinators.
+4. Generate automated notifications for stakeholders.
+
+#### **5.2 Automating Grading (Teacher)**
+1. Upload assessment criteria and task details.
+2. Use the AI grader to evaluate submissions.
+3. Provide personalized feedback with AI-generated suggestions.
+
+#### **5.3 Parent-Teacher Communication (Parent)**
+1. View flagged concerns or feedback from teachers.
+2. Schedule a meeting via the messaging tool.
+3. Review action points post-meeting.
+
+---
+
+### **6. Technical and Non-Functional Requirements**
+#### **6.1 Scalability**
+- Support for multi-institution setups.
+- High availability and performance for concurrent users.
+
+#### **6.2 Security**
+- Multi-factor authentication (MFA).
+- Encryption of all sensitive data.
+- Comprehensive data auditing and user activity logging.
+
+#### **6.3 Accessibility**
+- WCAG-compliant interfaces for users with disabilities.
+- Multilingual support for global adoption.
+
+#### **6.4 Usability**
+- Intuitive UI with generative assistance.
+- Minimalistic workflows for maximum productivity.
+
+---
+
+This document aligns with your vision for an **AI-First Learning Experience Platform**, balancing innovative AI-driven solutions with human-centric workflows. Let me know if you'd like further refinements!
