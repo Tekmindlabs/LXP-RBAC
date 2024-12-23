@@ -1,145 +1,241 @@
-### Updated Product Requirements Document (PRD) for AIVY LXP AI-First Learning Experience Platform
+## Detailed Requirements Specification by Portal
 
-#### **1. Overview**
-The AI-First Learning Experience Platform (LXP) is a transformative educational platform designed to provide a personalized, role-based, and generative user experience. At its core, it integrates CopilotKit—a robust AI-driven toolkit—to offer each role its unique workspace complete with a knowledge base, agents, tools, knowledge graphs, long-term memory, and full contextual understanding. 
-
-By focusing on minimal page navigation and leveraging generative UI design, users can create agentic workflows in an intuitive, LangChain-style interface. The platform prioritizes GDPR compliance, data privacy, and a human-centered design to ensure inclusivity, security, and adaptability.
+This document outlines the detailed functional and non-functional requirements for the AI-First Personalized Learning Platform, broken down by portal in the specified development order: Admin Portal, Program Coordinator Portal, Teacher Portal, and Student Portal.
 
 ---
 
-### **2. Platform Features**
-#### **2.1 Generative UI & Minimal Pages**
-- **Dynamic, Context-Aware UI**: Simplifies complex workflows into a single, generative interface.
-- **Adaptive Content Display**: The interface learns user preferences, tailoring layouts and recommendations dynamically.
-- **Agentic Workflows**: Drag-and-drop, LangGraph-style visual workflows to integrate AI agents, tools, and memory efficiently.
+Okay, here are the added requirements for the Admin Portal, specifically addressing Educators/Teachers Management and Enrollment Management:
 
-#### **2.2 Role-Specific Workspaces**
-Each user role (e.g., Student, Teacher, Coordinator, Parent, Admin) has a fully customized workspace comprising:
-- **Knowledge Base**: Centralized repository for documents, curriculum, and FAQs.
-- **AI Agents**: Role-specific assistants providing task support, such as grading, content creation, scheduling, and feedback.
-- **Tools**: Context-relevant functionalities, such as progress trackers, resource managers, or messaging systems.
-- **Knowledge Graphs**: Visual mapping of relationships between entities like subjects, classes, and students.
-- **Long-Term Memory**: AI remembers user preferences, historical decisions, and institutional trends.
+### 1. Admin Portal Requirements Specification (Updated)
 
-#### **2.3 GDPR Compliance and Data Privacy**
-- Role-based access control (RBAC) ensures data segmentation.
-- Data encryption in transit and at rest.
-- Compliance with global data privacy standards, including GDPR and CCPA.
-- User-level control over data sharing, deletion, and visibility.
+**Goal:** To provide platform administrators with the necessary tools to manage the overall system, user accounts, programs, courses, AI agent configurations, system-level settings, educators, and enrollments.
 
-#### **2.4 Human-Centric Design**
-- Inclusive workflows and accessible design (e.g., screen readers, multilingual support).
-- Transparency in AI decision-making to ensure user trust.
-- Real-time assistance with AI copilots for all user roles.
+**Target Users:** Platform Administrators
 
----
+**Key Features:**
 
-### **3. Role-Specific Tools and Default Workflows**
-#### **3.1 Administrator**
-##### Tools:
-- Centralized dashboard for managing users, roles, and data.
-- AI-driven audit tools for compliance and operational insights.
-- Communication hub for organization-wide announcements.
+* User Management
+* Program Management
+* Course & Session Management
+* AI Agent Configuration
+* System Monitoring & Analytics
+* Credit System Management
+* Content Library Management
+* Program Coordinator Management
+* **Educators/Teachers Management**
+* **Enrollment Management**
 
-##### Default Workflows:
-- **System Management**: Create academic structures (programs, class groups, terms).
-- **User Roles & Permissions**: Define user-specific roles and permissions.
-- **Audit Reports**: Generate weekly compliance and activity reports.
+**Detailed Requirements (Functional):**
 
-#### **3.2 Program Coordinator**
-##### Tools:
-- AI planning assistant for timetables, assessments, and teacher assignments.
-- Student and teacher performance tracking.
-- Resource allocation tools for class activities.
+| ID     | Feature Area               | Requirement                                                                                                                                                                                                   | Priority |
+| :------ | :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------- |
+| AP-F1   | User Management          | The system must allow administrators to **create** new user accounts (students, educators, program coordinators, other admins) by providing necessary details (username, email, password, role).                | High     |
+| AP-F2   | User Management          | The system must allow administrators to **read** (view) a list of all user accounts, including their roles and status.                                                                                       | High     |
+| AP-F3   | User Management          | The system must allow administrators to **update** existing user account details, including roles and status.                                                                                                   | High     |
+| AP-F4   | User Management          | The system must allow administrators to **delete** user accounts from the system.                                                                                                                              | High     |
+| AP-F5   | User Management          | The system must allow administrators to filter and search user accounts based on criteria like role, name, or email.                                                                                           | Medium   |
+| AP-F6   | Program Management         | The system must allow administrators to **create** new Programs by defining program name, description, learning objectives, and associating it with a Program Coordinator.                                 | High     |
+| AP-F7   | Program Management         | The system must allow administrators to **read** (view) a list of all Programs and their details.                                                                                                           | High     |
+| AP-F8   | Program Management         | The system must allow administrators to **update** existing Program details.                                                                                                                                | Medium   |
+| AP-F9   | Program Management         | The system must allow administrators to **delete** Programs.                                                                                                                                              | Medium   |
+| AP-F10  | Course & Session Mgmt    | The system must allow administrators to **create** new Courses, defining course name, description, associating it with a Program, and assigning educators.                                                    | High     |
+| AP-F11  | Course & Session Mgmt    | The system must allow administrators to **read** (view) a list of all Courses and their details.                                                                                                           | High     |
+| AP-F12  | Course & Session Mgmt    | The system must allow administrators to **update** existing Course details.                                                                                                                                | Medium   |
+| AP-F13  | Course & Session Mgmt    | The system must allow administrators to **delete** Courses.                                                                                                                                              | Medium   |
+| AP-F14  | Course & Session Mgmt    | The system must allow administrators to **create** new Sessions within a Course, defining schedule, capacity, and assigning educators.                                                                      | High     |
+| AP-F15  | Course & Session Mgmt    | The system must allow administrators to **read** (view) a list of all Sessions and their details.                                                                                                         | High     |
+| AP-F16  | Course & Session Mgmt    | The system must allow administrators to **update** existing Session details.                                                                                                                                | Medium   |
+| AP-F17  | Course & Session Mgmt    | The system must allow administrators to **delete** Sessions.                                                                                                                                              | Medium   |
+| AP-F18  | AI Agent Config          | The system must allow administrators to configure global parameters for AI agents, including base personalities, response styles (within predefined limits), and default access to knowledge bases.       | Medium   |
+| AP-F19  | AI Agent Config          | The system must allow administrators to monitor the overall performance and usage statistics of AI agents.                                                                                                  | Medium   |
+| AP-F20  | System Monitoring        | The system must provide administrators with a dashboard displaying key platform usage statistics (e.g., number of active users, content uploads, AI interactions).                                       | Medium   |
+| AP-F21  | System Monitoring        | The system must provide administrators with tools to monitor the performance of the platform infrastructure and identify potential technical issues.                                                      | High     |
+| AP-F22  | Credit System Mgmt       | The system must allow administrators to manage the global credit system, including setting initial credit balances for new users and configuring credit costs for AI interactions.                         | Medium   |
+| AP-F23  | Credit System Mgmt       | The system must allow administrators to view reports on credit usage across the platform.                                                                                                                     | Low      |
+| AP-F24  | Content Library Mgmt     | The system must provide a centralized repository for all learning content (documents, videos, etc.).                                                                                                       | Medium   |
+| AP-F25  | Content Library Mgmt     | The system must allow administrators to upload, categorize, and tag content in the content library.                                                                                                          | Medium   |
+| AP-F26  | Content Library Mgmt     | The system must allow administrators to manage access permissions for content in the library.                                                                                                                 | Low      |
+| AP-F27  | Program Coordinator Mgmt | The system must allow administrators to **create** new Program Coordinator accounts.                                                                                                                       | High     |
+| AP-F28  | Program Coordinator Mgmt | The system must allow administrators to **read** (view) a list of all Program Coordinators and their assigned Programs.                                                                                  | High     |
+| AP-F29  | Program Coordinator Mgmt | The system must allow administrators to **update** Program Coordinator details and their assigned Programs.                                                                                                | Medium   |
+| AP-F30  | Program Coordinator Mgmt | The system must allow administrators to **delete** Program Coordinator accounts.                                                                                                                           | Medium   |
+| **AP-F31** | **Educators/Teachers Mgmt** | The system must allow administrators to **read** (view) a list of all educator accounts, including their assigned Courses and Programs.                                                                  | High     |
+| **AP-F32** | **Educators/Teachers Mgmt** | The system must allow administrators to **update** educator account details, including their assigned Courses and Programs.                                                                             | Medium   |
+| **AP-F33** | **Educators/Teachers Mgmt** | The system must allow administrators to **assign** and **unassign** educators from specific Courses and Sessions.                                                                                        | High     |
+| **AP-F34** | **Educators/Teachers Mgmt** | The system must allow administrators to filter and search educator accounts based on criteria like name, email, or assigned Courses/Programs.                                                            | Medium   |
+| **AP-F35** | **Enrollment Management**  | The system must allow administrators to **read** (view) a list of all student enrollments in Programs, Courses, and Sessions.                                                                          | High     |
+| **AP-F36** | **Enrollment Management**  | The system must allow administrators to **manually enroll** students into specific Programs, Courses, and Sessions.                                                                                    | High     |
+| **AP-F37** | **Enrollment Management**  | The system must allow administrators to **manually unenroll** students from specific Programs, Courses, and Sessions.                                                                                  | High     |
+| **AP-F38** | **Enrollment Management**  | The system must allow administrators to view enrollment statistics and reports for Programs, Courses, and Sessions.                                                                                   | Medium   |
+| **AP-F39** | **Enrollment Management**  | The system should allow administrators to manage waiting lists for Sessions that are at full capacity (if this feature is implemented).                                                              | Low      |
+| **AP-F40** | **Enrollment Management**  | The system should allow administrators to bulk enroll or unenroll students using CSV files or similar methods.                                                                                         | Low      |
 
-##### Default Workflows:
-- **Timetable Management**: Set up class schedules, resolve conflicts, and notify stakeholders.
-- **Performance Analysis**: Track at-risk students, suggest interventions.
-- **Activity Planning**: Approve, monitor, and evaluate learning activities.
+**Non-Functional Requirements:**
 
-#### **3.3 Teacher**
-##### Tools:
-- Content creator for lesson plans, quizzes, and assignments.
-- AI-based grading assistant for faster evaluation and feedback.
-- Messaging and notification system for students and parents.
+* **AP-NF1: Security:** The Admin Portal must be secured with strong authentication and authorization mechanisms to prevent unauthorized access.
+* **AP-NF2: Performance:** The Admin Portal should be responsive and provide quick access to information and functionalities.
+* **AP-NF3: Usability:** The Admin Portal should have a clear, intuitive, and user-friendly interface for efficient management.
+* **AP-NF4: Auditability:** All administrative actions performed within the Admin Portal must be logged for audit purposes.
+* **AP-NF5: Reliability:** The Admin Portal must be reliable and available as needed.
 
-##### Default Workflows:
-- **Lesson Delivery**: Upload resources, assign tasks, and track submissions.
-- **Grading Workflow**: Use AI to grade, provide feedback, and update progress trackers.
-- **Parent Communication**: Notify parents of progress or concerns.
+These additions provide the necessary administrative capabilities for managing educators and student enrollments, ensuring comprehensive control over the platform's user base and program participation.
 
-#### **3.4 Student**
-##### Tools:
-- AI study companion for personalized learning guidance.
-- Performance tracker with visual insights and recommendations.
-- Interactive learning content with quizzes and practice tools.
-
-##### Default Workflows:
-- **Daily Workflow**: Access lessons, complete assignments, and track performance.
-- **Exam Preparation**: Get personalized study schedules and resources.
-- **Self-Assessment**: Practice quizzes and track improvement metrics.
-
-#### **3.5 Parent**
-##### Tools:
-- Unified dashboard for multi-child progress monitoring.
-- AI insights into performance trends and behavioral patterns.
-- Messaging tools for teacher-parent communication.
-
-##### Default Workflows:
-- **Progress Review**: Access grades, attendance, and feedback.
-- **Meeting Scheduling**: Arrange parent-teacher conferences.
-- **Behavioral Insights**: Address flagged concerns or celebrate milestones.
 
 ---
 
-### **4. Key AI-Driven Features**
-1. **CopilotKit Integration**: Modular toolkit enabling users to access AI-powered agents for task management, decision-making, and learning assistance.
-2. **Knowledge Graphs**: Visual representation of relationships between users, content, and activities.
-3. **Long-Term Memory**: AI contextual memory to maintain relevance across workflows and sessions.
-4. **LangGraph-Style Workflow Builder**: Visual, drag-and-drop interface for creating agentic workflows, such as:
-   - Automating notification schedules.
-   - Integrating third-party APIs into teaching or administrative tasks.
-   - Building personalized learning pathways for students.
+### 2. Program Coordinator Portal Requirements Specification
+
+**Goal:** To provide Program Coordinators with the tools to manage their assigned Programs, including curriculum oversight, content approval, educator management, and performance monitoring.
+
+**Target Users:** Program Coordinators
+
+**Key Features:**
+
+* Dashboard Overview
+* Program Management
+* Content Management & Approval
+* Educator Management
+* Reporting & Analytics
+* Communication Tools
+* Program Academic Calendar Management
+
+**Detailed Requirements (Functional):**
+
+| ID     | Feature Area               | Requirement                                                                                                                                                                                            | Priority |
+| :----- | :------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
+| PCP-F1 | Dashboard Overview         | The portal must display an overview of assigned programs, key performance indicators (enrollment, completion rates), content approval queue, and educator activity summaries.                       | High     |
+| PCP-F2 | Program Management         | The system must allow Program Coordinators to **read** (view) detailed information about their assigned Programs, including objectives, curriculum structure, enrolled students, and associated educators. | High     |
+| PCP-F3 | Program Management         | The system must allow Program Coordinators to review the structure of their assigned Programs to ensure alignment with educational goals and standards.                                            | High     |
+| PCP-F4 | Program Management         | The system must allow Program Coordinators to **approve** or **reject** entire Programs, controlling their publishing and availability to students.                                                     | High     |
+| PCP-F5 | Program Management         | The system must allow Program Coordinators to **read** (view) the subject sequencing and Course structure within their assigned Programs.                                                               | High     |
+| PCP-F6 | Program Management         | The system must allow Program Coordinators to provide feedback and recommendations to educators regarding curriculum structure within their assigned Programs.                                      | Medium   |
+| PCP-F7 | Program Management         | The system must allow Program Coordinators to monitor key performance indicators for their assigned Programs and identify areas needing improvement.                                                   | Medium   |
+| PCP-F8 | Content Mgmt & Approval    | The system must provide an interface for Program Coordinators to view submitted interactive readings, quizzes, flashcards, and other activities for Courses within their assigned Programs.           | High     |
+| PCP-F9 | Content Mgmt & Approval    | The system must allow Program Coordinators to **approve** or **reject** submitted content, ensuring quality, accuracy, and alignment with learning objectives.                                       | High     |
+| PCP-F10 | Content Mgmt & Approval    | The system must allow Program Coordinators to provide specific feedback to educators on rejected content, suggesting improvements.                                                                     | High     |
+| PCP-F11 | Content Mgmt & Approval    | The system must allow Program Coordinators to review and approve new documents or updates to the vector database (RAG) for their assigned Programs.                                                 | High     |
+| PCP-F12 | Content Mgmt & Approval    | The system must allow Program Coordinators to monitor the performance of the RAG system within their assigned Programs.                                                                              | Medium   |
+| PCP-F13 | Educator Management        | The system must allow Program Coordinators to **read** (view) a list of educators contributing to Courses within their assigned Programs.                                                            | High     |
+| PCP-F14 | Educator Management        | The system must allow Program Coordinators to monitor educator activity, including content creation, feedback provided to students, and overall engagement within their assigned Programs.         | Medium   |
+| PCP-F15 | Educator Management        | The system must allow Program Coordinators to provide feedback and guidance to educators to improve their content and teaching practices within their assigned Programs.                             | Medium   |
+| PCP-F16 | Educator Management        | The system should allow Program Coordinators to approve or reject educator applications to contribute to specific Programs (if this functionality is implemented).                                 | Low      |
+| PCP-F17 | Reporting & Analytics      | The system must provide Program Coordinators with detailed reports on student progress, engagement, and completion rates within their assigned Programs.                                             | High     |
+| PCP-F18 | Reporting & Analytics      | The system must provide Program Coordinators with reports analyzing the effectiveness of content within their assigned Programs.                                                                    | Medium   |
+| PCP-F19 | Reporting & Analytics      | The system must provide Program Coordinators with reports on educator performance within their assigned Programs.                                                                                 | Low      |
+| PCP-F20 | Communication Tools        | The system must allow Program Coordinators to send direct messages to educators within their assigned Programs.                                                                                     | High     |
+| PCP-F21 | Communication Tools        | The system must allow Program Coordinators to make announcements to students enrolled in their assigned Programs.                                                                                    | Medium   |
+| PCP-F22 | Program Academic Calendar  | The system must allow Program Coordinators to **create** and manage the academic calendar for their assigned Programs, including defining key dates, holidays, and deadlines.                      | High     |
+| PCP-F23 | Program Academic Calendar  | The system must allow Program Coordinators to **read** (view) the academic calendar for their assigned Programs.                                                                                  | High     |
+
+**Non-Functional Requirements:**
+
+* **PCP-NF1: Security:** The Program Coordinator Portal must be secured with appropriate authentication and authorization mechanisms.
+* **PCP-NF2: Performance:** The Program Coordinator Portal should be responsive and provide efficient access to program-related information.
+* **PCP-NF3: Usability:** The Program Coordinator Portal should have a clear and intuitive interface for managing program activities.
+* **PCP-NF4: Reliability:** The Program Coordinator Portal must be reliable and available as needed.
 
 ---
 
-### **5. Workflow Examples**
-#### **5.1 Creating a New Academic Program (Coordinator)**
-1. Define program objectives and duration.
-2. Set up associated terms, class groups, and subjects.
-3. Assign teachers and coordinators.
-4. Generate automated notifications for stakeholders.
+### 3. Teacher Portal Requirements Specification
 
-#### **5.2 Automating Grading (Teacher)**
-1. Upload assessment criteria and task details.
-2. Use the AI grader to evaluate submissions.
-3. Provide personalized feedback with AI-generated suggestions.
+**Goal:** To provide educators with the tools to manage their assigned Courses and Sessions, create and manage content, interact with students, and monitor student progress.
 
-#### **5.3 Parent-Teacher Communication (Parent)**
-1. View flagged concerns or feedback from teachers.
-2. Schedule a meeting via the messaging tool.
-3. Review action points post-meeting.
+**Target Users:** Educators
+
+**Key Features:**
+
+* Dashboard Overview
+* Course & Session Management
+* Content Authoring & Management
+* Student Management
+* Progress Monitoring & Analytics
+* Communication Tools
+* RAG Knowledge Base Contribution
+
+**Detailed Requirements (Functional):**
+
+| ID     | Feature Area               | Requirement                                                                                                                                                                                           | Priority |
+| :----- | :------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
+| TP-F1  | Dashboard Overview         | The portal must display an overview of assigned Courses and Sessions, student progress summaries, and communication notifications.                                                                 | High     |
+| TP-F2  | Course & Session Mgmt      | The system must allow educators to **read** (view) details of their assigned Courses and Sessions.                                                                                                   | High     |
+| TP-F3  | Course & Session Mgmt      | The system must allow educators to manage their Session schedules and availability (if applicable).                                                                                                   | Medium   |
+| TP-F4  | Content Authoring & Mgmt   | The system must provide educators with tools to create interactive readings, including embedding examples and AI assistance prompts.                                                               | High     |
+| TP-F5  | Content Authoring & Mgmt   | The system must provide educators with tools to create quizzes with various question types.                                                                                                          | High     |
+| TP-F6  | Content Authoring & Mgmt   | The system must provide educators with tools to create flashcard decks for their Courses.                                                                                                          | Medium   |
+| TP-F7  | Content Authoring & Mgmt   | The system must allow educators to upload and manage learning resources (documents, videos, etc.) for their Courses.                                                                               | High     |
+| TP-F8  | Content Authoring & Mgmt   | The system must allow educators to submit authored content for review and approval by the Program Coordinator.                                                                                       | High     |
+| TP-F9  | Student Management         | The system must allow educators to **read** (view) profiles of students enrolled in their Courses and Sessions.                                                                                         | High     |
+| TP-F10 | Student Management         | The system must allow educators to communicate with individual students or groups of students within their Courses and Sessions via direct messaging.                                                   | High     |
+| TP-F11 | Student Management         | The system must allow educators to provide feedback on student assignments and activities within their Courses.                                                                                      | High     |
+| TP-F12 | Student Management         | The system should allow educators to adjust individual student learning paths or recommend specific activities within their Courses (with appropriate permissions).                                  | Medium   |
+| TP-F13 | Progress Monitoring & Analytics | The system must provide educators with detailed reports on student progress and performance within their Courses and Sessions.                                                                     | High     |
+| TP-F14 | Progress Monitoring & Analytics | The system must provide educators with analytics on the effectiveness of their content within their Courses.                                                                                       | Medium   |
+| TP-F15 | Communication Tools        | The system must allow educators to send announcements to students enrolled in their Courses and Sessions.                                                                                             | High     |
+| TP-F16 | RAG Knowledge Base Contrib | The system must allow educators to contribute to the subject knowledge base (RAG) for their Courses by uploading relevant documents and providing descriptions.                                     | High     |
+| TP-F17 | RAG Knowledge Base Contrib | The system must provide educators with guidelines and best practices for contributing to the knowledge base.                                                                                         | Medium   |
+
+**Non-Functional Requirements:**
+
+* **TP-NF1: Security:** The Teacher Portal must be secured to protect student data and prevent unauthorized access to course materials.
+* **TP-NF2: Performance:** The Teacher Portal should be responsive and allow for efficient content creation and student management.
+* **TP-NF3: Usability:** The Teacher Portal should have an intuitive interface that is easy for educators to use for their daily tasks.
+* **TP-NF4: Reliability:** The Teacher Portal must be reliable and available for educators to manage their courses effectively.
 
 ---
 
-### **6. Technical and Non-Functional Requirements**
-#### **6.1 Scalability**
-- Support for multi-institution setups.
-- High availability and performance for concurrent users.
+### 4. Student Portal Requirements Specification
 
-#### **6.2 Security**
-- Multi-factor authentication (MFA).
-- Encryption of all sensitive data.
-- Comprehensive data auditing and user activity logging.
+**Goal:** To provide students with a personalized and engaging learning environment where they can access course materials, interact with AI tutors, track their progress, and participate in gamified activities.
 
-#### **6.3 Accessibility**
-- WCAG-compliant interfaces for users with disabilities.
-- Multilingual support for global adoption.
+**Target Users:** Students
 
-#### **6.4 Usability**
-- Intuitive UI with generative assistance.
-- Minimalistic workflows for maximum productivity.
+**Key Features:**
 
----
+* Personalized Dashboard
+* Program & Course Access
+* Session Management
+* AI Tutor Interaction
+* Activity Hub
+* Personalized Learning Path
+* Scheduler & Goal Setting
+* Program Academic Calendar
+* Progress Tracking & Analytics
+* Communication Tools
+* Leaderboards & Badges
 
-This document aligns with your vision for an **AI-First Learning Experience Platform**, balancing innovative AI-driven solutions with human-centric workflows. Let me know if you'd like further refinements!
+**Detailed Requirements (Functional):**
+
+| ID     | Feature Area              | Requirement                                                                                                                                                                                               | Priority |
+| :----- | :------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
+| SP-F1  | Personalized Dashboard    | The portal must display a personalized welcome message, learning path progress, upcoming activities, AI agent recommendations, and goal tracking.                                                          | High     |
+| SP-F2  | Program & Course Access   | The system must allow students to browse available Programs and enroll in them.                                                                                                                            | High     |
+| SP-F3  | Program & Course Access   | The system must allow students to view the Courses they are enrolled in within their Programs.                                                                                                              | High     |
+| SP-F4  | Session Management        | The system must allow students to view details of their assigned Sessions within a Course, including schedule and educator.                                                                               | High     |
+| SP-F5  | AI Tutor Interaction      | The system must provide a dedicated chat interface for students to interact with AI agents.                                                                                                                 | High     |
+| SP-F6  | AI Tutor Interaction      | The system must allow students to select specific AI agents for different learning needs.                                                                                                                 | Medium   |
+| SP-F7  | AI Tutor Interaction      | The system should provide contextual AI assistance based on the student's current activity-subject-course context.                                                                                                               | Medium   |
+| SP-F8  | Activity Hub              | The system must allow students to access and participate in quizzes, openpended quizzes and live quizzes within their Courses.                                                                                                                | High     |
+| SP-F9  | Activity Hub              | The system must allow students to access and utilize personalized flashcards for their Courses.                                                                                                           | Medium   |
+| SP-F10 | Activity Hub              | The system must allow students to access and interact with interactive readings, including utilizing AI assistance for explanations.                                                                     | High     |
+| SP-F11 | Activity Hub              | The system must allow students to submit assignments for their Courses.                                                                                                                                 | High     |
+| SP-F12 | Activity Hub              | The system must allow students to participate in gamified activities and view their progress.                                                                                                             | Medium   |
+| SP-F13 | Personalized Learning Path | The system must display the AI-generated learning path for each Course.                                                                                                                                  | High     |
+| SP-F14 | Personalized Learning Path | The system should allow students to customize their learning path within Courses to some extent (e.g., prioritize topics).                                                                             | Medium   |
+| SP-F15 | Scheduler & Goal Setting    | The system must allow students to schedule study sessions and set reminders.                                                                                                                              | Medium   |
+| SP-F16 | Scheduler & Goal Setting    | The system must allow students to set learning goals for individual Courses and the overall Program.                                                                                                    | Medium   |
+| SP-F17 | Program Academic Calendar | The system must allow students to view the academic calendar for their enrolled Program.                                                                                                                  | High     |
+| SP-F18 | Progress Tracking & Analytics | The system must display the student's progress within each Course.                                                                                                                                    | High     |
+| SP-F19 | Progress Tracking & Analytics | The system must track and display the student's skill mastery within Courses.                                                                                                                            | Medium   |
+| SP-F20 | Progress Tracking & Analytics | The system must display the student's performance history on quizzes and assignments.                                                                                                                  | High     |
+| SP-F21 | Communication Tools       | The system must allow students to send direct messages to their educators within specific Courses.                                                                                                     | High     |
+| SP-F22 | Communication Tools       | The system should provide access to optional forum or community features for each Course.                                                                                                               | Low      |
+| SP-F23 | Leaderboards & Badges     | The system must display leaderboards for Courses and potentially Programs.                                                                                                                               | Medium   |
+| SP-F24 | Leaderboards & Badges     | The system must display the badges and points earned by the student through gamified activities.                                                                                                         | Medium   |
+
+**Non-Functional Requirements:**
+
+* **SP-NF1: Security:** The Student Portal must be secure to protect student data and privacy.
+* **SP-NF2: Performance:** The Student Portal should be responsive and provide a smooth learning experience.
+* **SP-NF3: Usability:** The Student Portal should have an intuitive and engaging interface that is easy for students to navigate.
+* **SP-NF4: Accessibility:** The Student Portal should be accessible to students with disabilities, adhering to accessibility guidelines.
+* **SP-NF5: Reliability:** The Student Portal must be reliable and available for students to access their learning materials and activities.
